@@ -7,6 +7,7 @@ export interface Post {
     userId?: number;
   }
 
+  // handle error
 const handleApiError = async (response: Response) => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
@@ -16,7 +17,7 @@ const handleApiError = async (response: Response) => {
   return response;
 };
 
-// Servicio para obtener todas las publicaciones
+// get all posts
 export const getPosts = async (): Promise<Post[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/posts`);
@@ -27,3 +28,24 @@ export const getPosts = async (): Promise<Post[]> => {
     throw error;
   }
 };
+
+// create a new post
+export const createPost = async (post: Post): Promise<Post> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...post,
+          userId: 1, // Asigné todos los posts al userId 1
+        }),
+      });
+      await handleApiError(response);
+      return response.json();
+    } catch (error) {
+      console.error('Error al crear post:', error);
+      throw error;
+    }
+  };
