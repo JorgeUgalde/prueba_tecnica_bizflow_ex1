@@ -18,7 +18,6 @@ const PostForm: React.FC<PostFormProps> = ({
   const [body, setBody] = useState('');
   const [errors, setErrors] = useState({ title: '', body: '' });
 
-  // Cargar datos del post si está en modo edición
   useEffect(() => {
     if (post) {
       setTitle(post.title);
@@ -51,13 +50,7 @@ const PostForm: React.FC<PostFormProps> = ({
       const formData: Post = {
         title: title.trim(),
         body: body.trim(),
-      };
-      
-      // Si existe id, estamos editando un post existente
-      if (post?.id) {
-        formData.id = post.id;
-      }
-      
+      };            
       onSubmit(formData);
     }
   };
