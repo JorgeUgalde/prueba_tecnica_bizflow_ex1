@@ -49,3 +49,23 @@ export const createPost = async (post: Post): Promise<Post> => {
       throw error;
     }
   };
+
+
+  
+// Edit a post
+export const updatePost = async (id: number, postData: Partial<Post>): Promise<Post> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
+      });
+      await handleApiError(response);
+      return response.json();
+    } catch (error) {
+      console.error(`Error al actualizar post con id ${id}:`, error);
+      throw error;
+    }
+  };

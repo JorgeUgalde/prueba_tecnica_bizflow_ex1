@@ -42,7 +42,6 @@ const PostForm: React.FC<PostFormProps> = ({
     setErrors(newErrors);
     return isValid;
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -50,7 +49,12 @@ const PostForm: React.FC<PostFormProps> = ({
       const formData: Post = {
         title: title.trim(),
         body: body.trim(),
-      };            
+      };
+      
+      if (post?.id) {
+        formData.id = post.id;
+      }
+      
       onSubmit(formData);
     }
   };
@@ -58,7 +62,7 @@ const PostForm: React.FC<PostFormProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-bold mb-4 text-gray-800">
-        'Crear Nueva Publicación'
+      {post ? 'Editar Publicación' : 'Crear Nueva Publicación'}
       </h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">

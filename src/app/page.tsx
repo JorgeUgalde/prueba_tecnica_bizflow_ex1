@@ -1,18 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getPosts, createPost, Post } from '../services/apiService';
+import { getPosts, createPost, updatePost, Post } from '../services/apiService';
 import PostCart from '../components/PostCard';
 import PostForm from '../components/PostForm';
 import Notification from '../components/Notification';
-
-
-
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [notification, setNotification] = useState<{
     message: string;
     type: 'success' | 'error';
@@ -23,16 +21,20 @@ export default function Home() {
   }, []);
 
   const handleSubmitForm = (post: Post) => {
-    handleCreatePost(post);
+    if (editingPost) {
+      handleUpdatePost(post);
+    } else {
+      handleCreatePost(post);
+    }
   };
 
-    const showNotification = (message: string, type: 'success' | 'error') => {
-      setNotification({ message, type });
-    };
-  
-    const closeNotification = () => {
-      setNotification(null);
-    };
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setNotification({ message, type });
+  };
+
+  const closeNotification = () => {
+    setNotification(null);
+  };
 
   const fetchPosts = async () => {
     setIsLoading(true);
@@ -61,10 +63,37 @@ export default function Home() {
   };
 
   const handleCancelForm = () => {
+    setEditingPost(null);
+    setShowForm(false);
+  };
+  const handleEditPost = (post: Post) => {
+    setEditingPost(post);
     setShowForm(false);
   };
 
-  
+  const handleUpdatePost = async (post: Post) => {
+    if (!post.id) return;
+
+    setIsLoading(true);
+    try {
+      const updatedPost = await updatePost(post.id, {
+        title: post.title,
+        body: post.body,
+      });
+
+      setPosts((prevPosts) =>
+        prevPosts.map((p) => (p.id === post.id ? { ...p, ...updatedPost } : p))
+      );
+
+      setEditingPost(null);
+      showNotification('Publicación actualizada con éxito', 'success');
+    } catch (error) {
+      showNotification('Error al actualizar la publicación', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
 
   return (
@@ -86,19 +115,12 @@ export default function Home() {
 
         </div>
 
-        {/* Formulario para crear o editar */}
+        {/*Form */}
         <div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-          >
-            Nueva Publicación
-          </button>
-
-          {(showForm) && (
+          {(showForm || editingPost) && (
             <div className="mb-6">
               <PostForm
-                post={undefined}
+                post={editingPost || undefined}
                 onSubmit={handleSubmitForm}
                 onCancel={handleCancelForm}
                 isLoading={isLoading}
@@ -106,7 +128,16 @@ export default function Home() {
             </div>
           )}
 
-        {/* Lista de publicaciones */}
+          {!showForm && !editingPost && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+              Nueva Publicación
+            </button>
+          )}
+
+          {/* List of posts */}
 
           {isLoading && !posts.length ? (
             <div className="text-center py-10">
@@ -115,7 +146,7 @@ export default function Home() {
             </div>
           ) : posts.length ? (
             posts.map((post) => (
-              <PostCart key={`post-${post.id}-${post.title}`} post={post} />
+              <PostCart key={`post-${post.id}-${post.title}`} post={post} onEdit={handleEditPost} />
             ))
           ) : (
             <p className="text-center py-10 text-gray-500">No hay publicaciones disponibles.</p>
