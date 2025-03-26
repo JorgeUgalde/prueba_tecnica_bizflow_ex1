@@ -16,9 +16,7 @@ export default function Home() {
     type: 'success' | 'error';
   } | null>(null);
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  
 
   const handleSubmitForm = (post: Post) => {
     if (editingPost) {
@@ -41,12 +39,16 @@ export default function Home() {
     try {
       const data = await getPosts();
       setPosts(data);
-    } catch (error) {
-      showNotification('Error al cargar las publicaciones', 'error');
+    } catch (_error) {
+      showNotification('Error al cargar las publicaciones '  , 'error');
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   const handleCreatePost = async (post: Post) => {
     setIsLoading(true);
@@ -55,8 +57,8 @@ export default function Home() {
       setPosts((prevPosts) => [newPost, ...prevPosts]);
       setShowForm(false);
       showNotification('Publicación creada con éxito', 'success');
-    } catch (error) {
-      showNotification('Error al crear la publicación', 'error');
+    } catch (_error) {
+      showNotification('Error al crear la publicación ', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -87,8 +89,8 @@ export default function Home() {
 
       setEditingPost(null);
       showNotification('Publicación actualizada con éxito', 'success');
-    } catch (error) {
-      showNotification('Error al actualizar la publicación', 'error');
+    } catch (_error) {
+      showNotification('Error al actualizar la publicación ' , 'error');
     } finally {
       setIsLoading(false);
     }
